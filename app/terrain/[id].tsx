@@ -150,26 +150,9 @@ export default function TerrainDetailScreen() {
         style={styles.input}
       />
       <View style={styles.buttonContainer}>
-        <Button title={t('addNow')} onPress={handleAddNow} />
+        <Button title={t('addPlayer')} onPress={handleAddNow} />
       </View>
-      <View style={styles.buttonContainer}>
-        {Platform.OS === 'web' && (
-          <>
-            <TextInput
-              placeholder={t('addAtTime')}
-              value={time}
-              onChangeText={(text) => setTime(text)}
-              style={styles.input}
-            />
-            <Button title={`${t('addAtTime')} ${time}`} onPress={() => handleAddAtTime(time)} />
-          </>
-        )}
-        {Platform.OS !== 'web' && (
-          <>
-            <Button title={t('addAtTime')} onPress={() => setVisible(true)} />
-          </>
-        )}
-      </View>
+     
     </ThemedView>
   );
 }
@@ -181,4 +164,5 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 18, marginBottom: 8 },
   player: { fontSize: 16, marginBottom: 4 },
   trashIcon: { position: 'absolute', right: 0 },
+  input: { color: 'grey' }
 });
