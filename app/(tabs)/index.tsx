@@ -61,79 +61,58 @@ export default function TerrainListScreen() {
     return () => unsubscribe();
   }, []);
 
-  // Track user position and update Firestore
-  useEffect(() => {
-    let subscription;
-    let debouncedTrackUserPosition;
-     
-    // Track user position and updates presences on terrains
-    const trackUserPosition = async () => {
-      subscription = await watchLocation(async (location) => {
-        debouncedTrackUserPosition = _.debounce(async (location) => {
-        terrains.forEach(async (terrain) => {
-          if (!terrain.location) return; // Skip if no location
-          const distance = calculateDistance(
-            location.coords,
-            terrain.location
-          );
-
-          if (distance <= 1) {
-            // wait a random time between 1 and 5 seconds to avoid spamming the database
-            const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
-            await new Promise((resolve) => setTimeout(resolve, randomDelay));
-            // Add user to the court's player list
-            const terrainRef = doc(db, 'terrains', terrain.id);
-            const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
-            const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with actual user ID
-            if (!playerExists) {
-              // Add user to the players list
-              await addDoc(collection(db, `terrains/${terrain.id}/players`), {
-                name: username, // Replace with actual user name
-                status: 'present',
-              });
-
-            
-              // Get the players count
-                const playersCount = fetchedPlayers.length;
-              // update players count
-              await updateDoc(terrainRef, {
-                playersCount: playersCount + 1,
-              });
-            }
-          } else {
-            console.log('User is not within 5 km of the terrain:', terrain.name);
-            // Remove user from the court's player list
-            const terrainRef = doc(db, 'terrains', terrain.id);
-            // wait a random time between 1 and 5 seconds to avoid spamming the database
-            const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
-            await new Promise((resolve) => setTimeout(resolve, randomDelay));
-            const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
-            const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with actual user ID
-            if (playerExists) {
-              // Remove user from the players count
-              await updateDoc(terrainRef, {
-                playersCount: Math.max(0, fetchedPlayers.length - 1),
-              });
-              // Remove user from the players list
-              const playerDoc = fetchedPlayers.find(player => player.name === username); // Replace with actual user ID
-              if (playerDoc) {
-                await deleteDoc(doc(db, `terrains/${terrain.id}/players`, playerDoc.id));
-              }
-              console.log('User removed from the terrain players list:', terrain.name);
-            }
-
-          }
-        }, 1000); // Debounce for 1 second
+  const locationIsInRange = async (distance, terrain) => {    
+    if (distance <= 1) {
+      // wait a random time between 1 and 5 seconds to avoid spamming the database
+      const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
+      await new Promise((resolve) => setTimeout(resolve, randomDelay));
+      // Add user to the court's player list
+      const terrainRef = doc(db, 'terrains', terrain.id);
+      const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
+      const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with actual user ID
+      if (!playerExists) {
+        // Add user to the players list
+        await addDoc(collection(db, `terrains/${terrain.id}/players`), {
+          name: username, // Replace with actual user name
+          status: 'present',
         });
-      });
-    };
 
-    trackUserPosition();
-    return ;
-  }, [terrains]);
-  
+      
+        // Get the players count
+          const playersCount = fetchedPlayers.length;
+        // update players count
+        await updateDoc(terrainRef, {
+          playersCount: playersCount + 1,
+        });
+      }
+    } else {
+      console.log('User is not within 5 km of the terrain:', terrain.name);
+      // Remove user from the court's player list
+      const terrainRef = doc(db, 'terrains', terrain.id);
+      // wait a random time between 1 and 5 seconds to avoid spamming the database
+      const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
+      await new Promise((resolve) => setTimeout(resolve, randomDelay));
+      const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
+      const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with actual user ID
+      if (playerExists) {
+        // Remove user from the players count
+        await updateDoc(terrainRef, {
+          playersCount: Math.max(0, fetchedPlayers.length - 1),
+        });
+        // Remove user from the players list
+        const playerDoc = fetchedPlayers.find(player => player.name === username); // Replace with actual user ID
+        if (playerDoc) {
+          await deleteDoc(doc(db, `terrains/${terrain.id}/players`, playerDoc.id));
+        }
+        console.log('User removed from the terrain players list:', terrain.name);
+      }
+
+    }
+  }
+
+
 
   
   useEffect(() => {
@@ -145,6 +124,9 @@ export default function TerrainListScreen() {
         if (terrain.location && location?.coords) {
           const distance = calculateDistance(location.coords, terrain.location);
           terrain.distance = distance;
+
+          locationIsInRange(distance, terrain); // Check if the user is within range
+          
         } else {
           terrain.distance = null;
         }

@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import * as Localization from 'expo-localization'; // Import expo-localization
+import { Settings } from 'react-native';
 
 // Detect the user's locale
 const userLocale = Localization.locale.split('-')[0]; // Extract language code (e.g., 'en' from 'en-US')
@@ -29,6 +30,7 @@ const resources = {
       presenceDetectionAllowed: 'Presence Detection Allowed',
       username: 'Username',
       enterUsername: 'Enter your username',
+      Settings: 'Settings',
     },
   },
   fr: {
@@ -53,6 +55,7 @@ const resources = {
       presenceDetectionAllowed: 'Détection de présence autorisée',
       username: 'Nom d\'utilisateur',
       enterUsername: 'Entrez votre nom d\'utilisateur',
+      Settings: 'Paramètres',
     },
   },
   es: {
@@ -77,6 +80,7 @@ const resources = {
       presenceDetectionAllowed: 'Detección de presencia permitida',
       username: 'Nombre de usuario',
       enterUsername: 'Ingrese su nombre de usuario',
+      Settings: 'Configuraciones',
     },
   },
 };

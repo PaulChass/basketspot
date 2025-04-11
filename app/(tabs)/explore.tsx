@@ -5,10 +5,10 @@ import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import i18n from 'i18next';
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next'; // Import useTranslation hook
-import Storage from '@/utils/storage'; // Import storage utility
+import { useTranslation } from 'react-i18next'; 
+import Storage from '@/utils/storage'; 
 export default function TabTwoScreen() {
-  const { t } = useTranslation(); // Initialize translations
+  const { t } = useTranslation(); 
   const [isPresenceDetectionAllowed, setIsPresenceDetectionAllowed] = useState(true);
   const [username, setUsername] = useState('');
 
