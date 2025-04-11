@@ -7,7 +7,7 @@ import { collection, addDoc, getDocs, deleteDoc, doc, getDoc } from 'firebase/fi
 import { db } from '@/firebase';
 import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next'; // Import translations
-import { increment, updateDoc } from 'firebase/firestore'; // Import increment function
+import { increment, updateDoc, onSnapshot } from 'firebase/firestore'; // Import increment function
 
 export default function TerrainDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -32,6 +32,16 @@ export default function TerrainDetailScreen() {
       console.error('Error fetching players:', error);
     }
   };
+
+  // Watch the players collection for changes
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, `terrains/${id}/players`), (snapshot) => {
+      const updatedPlayers = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setPlayers(updatedPlayers);
+    });
+    return () => unsubscribe();
+  }
+, [id]);
 
   const handleAddNow = async () => {
     try {

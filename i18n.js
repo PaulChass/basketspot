@@ -1,7 +1,11 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import * as Localization from 'expo-localization'; // Import expo-localization
 
-// Traductions pour chaque langue
+// Detect the user's locale
+const userLocale = Localization.locale.split('-')[0]; // Extract language code (e.g., 'en' from 'en-US')
+
+// Define translations
 const resources = {
   en: {
     translation: {
@@ -17,9 +21,14 @@ const resources = {
       courtName: 'Court Name',
       playersList: 'Players Present / Coming:',
       playerNamePlaceholder: 'Player Name',
-      addNow: 'I am here now',
-      addAtTime: 'I will come at',
+      addNow: 'Here now',
+      addAtTime: 'Will come at',
       removePlayer: 'Remove Player',
+      explore: 'Explore',
+      allowPresenceDetection: 'Allow Presence Detection',
+      presenceDetectionAllowed: 'Presence Detection Allowed',
+      username: 'Username',
+      enterUsername: 'Enter your username',
     },
   },
   fr: {
@@ -36,9 +45,14 @@ const resources = {
       courtName: 'Nom du terrain',
       playersList: 'Joueurs présents / à venir :',
       playerNamePlaceholder: 'Nom du joueur',
-      addNow: 'Je suis là maintenant',
-      addAtTime: 'Je viendrai à',
+      addNow: 'Là maintenant',
+      addAtTime: 'Viendra à',
       removePlayer: 'Supprimer le joueur',
+      explore: 'Explorer',
+      allowPresenceDetection: 'Autoriser la détection de présence',
+      presenceDetectionAllowed: 'Détection de présence autorisée',
+      username: 'Nom d\'utilisateur',
+      enterUsername: 'Entrez votre nom d\'utilisateur',
     },
   },
   es: {
@@ -55,19 +69,25 @@ const resources = {
       courtName: 'Nombre de la cancha',
       playersList: 'Jugadores presentes / por venir:',
       playerNamePlaceholder: 'Nombre del jugador',
-      addNow: 'Estoy aquí ahora',
-      addAtTime: 'Llegaré a',
+      addNow: 'Aquí ahora',
+      addAtTime: 'Vendrá a',
       removePlayer: 'Eliminar jugador',
+      explore: 'Explorar',
+      allowPresenceDetection: 'Permitir detección de presencia',
+      presenceDetectionAllowed: 'Detección de presencia permitida',
+      username: 'Nombre de usuario',
+      enterUsername: 'Ingrese su nombre de usuario',
     },
   },
 };
 
+// Initialize i18n
 i18n.use(initReactI18next).init({
   resources,
-  lng: 'en', 
-  fallbackLng: 'en', 
+  lng: userLocale, // Set the default language based on the user's locale
+  fallbackLng: 'en', // Fallback to English if the user's locale is not supported
   interpolation: {
-    escapeValue: false, // React gère déjà l'échappement des valeurs
+    escapeValue: false, // React already handles escaping
   },
 });
 

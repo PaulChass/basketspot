@@ -1,81 +1,155 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button, Alert, TextInput } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { getDocs } from 'firebase/firestore';
 import { useRouter } from 'expo-router';
-import { collection, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc , getDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { useTranslation } from 'react-i18next';
-import * as Location from 'expo-location';
-
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import _ from 'lodash';
+import Storage from '@/utils/storage';  
 
 
 export default function TerrainListScreen() {
-  const { t } = useTranslation(); // Hook pour traductions
-  const [terrains, setTerrains] = useState([]); // État pour stocker les terrains depuis Firestore
-  const [terrainName, setTerrainName] = useState(''); // État pour le nom du terrain
+  const { t } = useTranslation();
+  const [terrains, setTerrains] = useState([]);
+  const [terrainName, setTerrainName] = useState('');
   const router = useRouter();
-  const [updated, setUpdated] = useState(false); // État pour suivre les mises à jour
-  const [location, setLocation] = useState(null); // État pour stocker la localisation
+  const { location, fetchLocation, watchLocation, calculateDistance } = useGeolocation();
+  const [username, setUsername] = useState(''); // State for username
+  const [usernameInput, setUsernameInput] = useState(''); // State for username input
 
- 
 
+   // Retrieve username from AsyncStorage when the component mounts
   useEffect(() => {
-    const fetchLocation = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
-        setLocation(location);
+    const loadUsername = async () => {
+      try {
+        const storedUsername = await Storage.getItem('username');
+        if (storedUsername) {
+          setUsername(storedUsername);
+        }
+      } catch (error) {
+        console.error('Error loading username:', error);
       }
     };
-  
-    fetchLocation();
+
+    loadUsername();
   }, []);
-  // fonction pour demander la permission de localisation
+
+  const handleUsernameChange = async (text) => {
+    setUsername(text);
+    try {
+      await Storage.setItem('username', text);
+      console.log('Username saved:', text);
+    } catch (error) {
+      console.error('Error saving username:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocation(); 
+    // Fetch terrains from Firestore
+    const unsubscribe = onSnapshot(collection(db, 'terrains'), (snapshot) => {
+      const fetchedTerrains = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTerrains(fetchedTerrains);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Track user position and update Firestore
   useEffect(() => {
     let subscription;
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log(t('location_permission_denied'));
-        return;
-      }
+    let debouncedTrackUserPosition;
+     
+    // Track user position and updates presences on terrains
+    const trackUserPosition = async () => {
+      subscription = await watchLocation(async (location) => {
+        debouncedTrackUserPosition = _.debounce(async (location) => {
+        terrains.forEach(async (terrain) => {
+          if (!terrain.location) return; // Skip if no location
+          const distance = calculateDistance(
+            location.coords,
+            terrain.location
+          );
 
-      subscription = await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.High, distanceInterval: 10 },
-        (location) => {
-          setLocation(location);
-        }
-      );
-    })();
-    return () => {
-      if (subscription) {
-        subscription.remove();
-      }
+          if (distance <= 1) {
+            // wait a random time between 1 and 5 seconds to avoid spamming the database
+            const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
+            await new Promise((resolve) => setTimeout(resolve, randomDelay));
+            // Add user to the court's player list
+            const terrainRef = doc(db, 'terrains', terrain.id);
+            const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
+            const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with actual user ID
+            if (!playerExists) {
+              // Add user to the players list
+              await addDoc(collection(db, `terrains/${terrain.id}/players`), {
+                name: username, // Replace with actual user name
+                status: 'present',
+              });
+
+            
+              // Get the players count
+                const playersCount = fetchedPlayers.length;
+              // update players count
+              await updateDoc(terrainRef, {
+                playersCount: playersCount + 1,
+              });
+            }
+          } else {
+            console.log('User is not within 5 km of the terrain:', terrain.name);
+            // Remove user from the court's player list
+            const terrainRef = doc(db, 'terrains', terrain.id);
+            // wait a random time between 1 and 5 seconds to avoid spamming the database
+            const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
+            await new Promise((resolve) => setTimeout(resolve, randomDelay));
+            const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
+            const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with actual user ID
+            if (playerExists) {
+              // Remove user from the players count
+              await updateDoc(terrainRef, {
+                playersCount: Math.max(0, fetchedPlayers.length - 1),
+              });
+              // Remove user from the players list
+              const playerDoc = fetchedPlayers.find(player => player.name === username); // Replace with actual user ID
+              if (playerDoc) {
+                await deleteDoc(doc(db, `terrains/${terrain.id}/players`, playerDoc.id));
+              }
+              console.log('User removed from the terrain players list:', terrain.name);
+            }
+
+          }
+        }, 1000); // Debounce for 1 second
+        });
+      });
     };
-  }, []);
 
+    trackUserPosition();
+    return ;
+  }, [terrains]);
   
 
-
-
+  
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'terrains'), (snapshot) => {
       snapshot.docs.forEach((doc) => {
         const terrain = { id: doc.id, ...doc.data() };
-        console.log('Terrain:', terrain);
-  
-        // Calculer la distance si la localisation est disponible
+
+        // Calculate distance if location is available
         if (terrain.location && location?.coords) {
           const distance = calculateDistance(location.coords, terrain.location);
           terrain.distance = distance;
         } else {
           terrain.distance = null;
         }
-  
-        // Ajouter le terrain à l'état
+
+        // Add terrain to state
         setTerrains((prevTerrains) => {
           const updatedTerrains = [...prevTerrains];
           const index = updatedTerrains.findIndex((t) => t.id === terrain.id);
@@ -88,12 +162,11 @@ export default function TerrainListScreen() {
         });
       });
     });
-  
+
     return () => unsubscribe();
   }, [location]);
  
  
-  console.log(terrains);
 
   const handleCreateTerrain = async () => {
     if (!terrainName.trim()) {
@@ -120,27 +193,21 @@ export default function TerrainListScreen() {
     }
   };
 
+ if(username === '') {
+  return (
+    <View style={styles.container}>
+      <TextInput
+        placeholder={t('usernamePlaceholder')}
+        placeholderTextColor={'grey'}
+        value={usernameInput}
+        onChangeText={setUsernameInput}
+        style={styles.input}
+      />
+      <Button title={t('saveUsername')} onPress={() => handleUsernameChange(usernameInput)} />
+    </View>
+  );
+}
 
-  
-  // Fonction pour calculer la distance entre deux points
-   const calculateDistance = (loc1, loc2) => {
-     const lat1 = loc1.latitude;
-    const lon1 = loc1.longitude;
-    const lat2 = loc2[0];
-    const lon2 = loc2[1];
-   const R = 6371; // Rayon de la Terre en km
-   const dLat = (lat2 - lat1) * (Math.PI / 180);
-   const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-       Math.cos(lat2 * (Math.PI / 180)) *
-   Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-   const distance = R * c; // Distance en km
-   const roundedDistance = Math.round(distance * 100) / 100; // Arrondi à deux décimales
-     return roundedDistance;
- };
 
  if ( terrains.length === 0) {
   return (
@@ -150,55 +217,53 @@ export default function TerrainListScreen() {
   );
 }
 
-  return (
-    <View style={styles.container}>
-      <ThemedText style={styles.title}>{t('availableCourts')}</ThemedText>
-       <FlatList
-        data={terrains}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.terrainItem}
-            onPress={() => router.push(`/terrain/${item.id}`)}
-          >
-            <View style={styles.row}>
-              <View style={styles.info}>
-                <Text style={styles.name}>{item.name}</Text>
-                <View style={styles.row}>
-                  <Text style={styles.details}>
-                    {item.playersCount > 1 && t('playersPresent_plural', { count: item.playersCount })}
-                    {item.playersCount <= 1 && t('playersPresent', { count: item.playersCount })}
-                  </Text>
-                  </View>
-                <View style={styles.row}>
-                   <Text style={styles.details}>
-                    {item.distance}
-                    { item.distance &&  ' km' }
-                  </Text> 
-                </View>
-                {/* <View style={styles.row}>
-                 <Text style={styles.details}>
-                    {t('distance', { distance: item.distance })}
-                  </Text> 
-                </View> */}
+return (
+  <View style={styles.container}>
+    <ThemedText style={styles.title}>{t('availableCourts')}</ThemedText>
+    <FlatList
+      data={terrains}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.terrainItem}
+          onPress={() => router.push(`/terrain/${item.id}`)}
+        >
+          <View style={styles.row}>
+            <View style={styles.info}>
+              <Text style={styles.name}>{item.name}</Text>
+              <View style={styles.row}>
+                <FontAwesome name="users" size={16} color="#555" />
+                <Text style={styles.details}>
+                  {item.playersCount > 1 && t('playersPresent_plural', { count: item.playersCount })}
+                  {item.playersCount <= 1 && t('playersPresent', { count: item.playersCount })}
+                </Text>
               </View>
-              <Text style={styles.link}>{t('view')}</Text>
+              <View style={styles.row}>
+                <FontAwesome name="map-marker" size={16} color="#555" />
+                <Text style={styles.details}>
+                  {item.distance}
+                  {item.distance && ' km'}
+                </Text>
+              </View>
             </View>
-          </TouchableOpacity>
-        )}
-      /> 
-      <View style={{ margin: 40 }}>
-        <TextInput
-          placeholder={t('courtNamePlaceholder')}
-          placeholderTextColor={'grey'}
-          value={terrainName}
-          onChangeText={setTerrainName}
-          style={styles.input}
-        />
-        <Button title={t('addCourt')} onPress={handleCreateTerrain} />
-      </View>
+            
+            <Text style={styles.link}>{t('view')}</Text>
+          </View>
+        </TouchableOpacity>
+      )}
+    />
+    <View style={{ margin: 40 }}>
+      <TextInput
+        placeholder={t('courtNamePlaceholder')}
+        placeholderTextColor={'grey'}
+        value={terrainName}
+        onChangeText={setTerrainName}
+        style={styles.input}
+      />
+      <Button title={t('addCourt')} onPress={handleCreateTerrain} />
     </View>
-  );
+  </View>
+);
 }
 
 const styles = StyleSheet.create({
@@ -211,11 +276,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  row: { flexDirection: 'row', alignItems: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center',width: '100%' },
   info: { flex: 1 },
   name: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
   details: { fontSize: 14, color: '#555', marginLeft: 4 },
-  link: { color: '#007AFF', fontWeight: 'bold' },
+  link: { color: '#007AFF', fontWeight: 'bold', position: 'absolute', right: 16 },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
   input: {
     borderWidth: 1,
