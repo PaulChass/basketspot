@@ -8,6 +8,7 @@ import { db } from '@/firebase';
 import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next'; // Import translations
 import { increment, updateDoc, onSnapshot } from 'firebase/firestore'; // Import increment function
+import FontAwesome from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome for icons
 
 export default function TerrainDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -126,11 +127,17 @@ export default function TerrainDetailScreen() {
         data={players}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={styles.playerRow}>
             <ThemedText style={styles.player}>
               {item.name} {item.status !== 'present' && `(${item.status})`}
             </ThemedText>
-            <Button title={t('removePlayer')} onPress={() => removePlayer(item.id)} color="grey" />
+            <FontAwesome
+              name="trash"
+              size={20}
+              color="grey"
+              onPress={() => removePlayer(item.id)} // Call the removePlayer function
+              style={styles.trashIcon}
+            />
           </View>
         )}
       />
@@ -140,7 +147,7 @@ export default function TerrainDetailScreen() {
         placeholderTextColor={'grey'}
         value={playername}
         onChangeText={setPlayerName}
-        style={{ borderWidth: 1, borderColor: '#ccc', color: 'grey', padding: 8, marginBottom: 16 }}
+        style={styles.input}
       />
       <View style={styles.buttonContainer}>
         <Button title={t('addNow')} onPress={handleAddNow} />
@@ -152,7 +159,7 @@ export default function TerrainDetailScreen() {
               placeholder={t('addAtTime')}
               value={time}
               onChangeText={(text) => setTime(text)}
-              style={{ borderWidth: 1, borderColor: '#ccc', padding: 8 }}
+              style={styles.input}
             />
             <Button title={`${t('addAtTime')} ${time}`} onPress={() => handleAddAtTime(time)} />
           </>
@@ -173,4 +180,5 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
   subtitle: { fontSize: 18, marginBottom: 8 },
   player: { fontSize: 16, marginBottom: 4 },
+  trashIcon: { position: 'absolute', right: 0 },
 });
