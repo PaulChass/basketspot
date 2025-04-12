@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
+import BackgroundGeolocation from 'react-native-background-geolocation';
 
 export function useGeolocation() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -20,15 +21,50 @@ export function useGeolocation() {
   const watchLocation = async (onLocationChange: (location: Location.LocationObject) => void) => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
-      return await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.High, distanceInterval: 10 },
-        (location) => {
-          setLocation(location);
-          onLocationChange(location);
+      // Initialize Background Geolocation
+      BackgroundGeolocation.ready(
+        {
+          desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+          distanceFilter: 10, // Minimum distance (in meters) to trigger location updates
+          stopOnTerminate: false, // Continue tracking even if the app is terminated
+          startOnBoot: true, // Start tracking when the device boots
+          logLevel: BackgroundGeolocation.LOG_LEVEL_VERBOSE,
+          enableHeadless: true, // Allow background tracking
+        },
+        (state) => {
+          if (!state.enabled) {
+            BackgroundGeolocation.start(); // Start tracking
+          }
         }
       );
+  
+      // Listen for location updates
+      const locationSubscription = BackgroundGeolocation.onLocation((location) => {
+        console.log('[BackgroundGeolocation Location]', location);
+        const { latitude, longitude } = location.coords;
+  
+        // Update state and trigger callback
+        setLocation({ coords: { latitude, longitude } } as Location.LocationObject);
+        onLocationChange({ coords: { latitude, longitude } } as Location.LocationObject);
+      });
+  
+      // Handle provider changes (e.g., GPS disabled)
+      const providerChangeSubscription = BackgroundGeolocation.onProviderChange((event) => {
+        if (!event.enabled) {
+          console.error('[Provider Change] Location services disabled:', event);
+        }
+      });
+  
+      // Return a cleanup function to stop tracking
+      return () => {
+        locationSubscription.remove();
+        providerChangeSubscription.remove();
+        BackgroundGeolocation.stop();
+      };
+    } else {
+      console.log('Location permission denied');
+      return null;
     }
-    return null;
   };
 
 
@@ -50,6 +86,8 @@ export function useGeolocation() {
     const distance = R * c;
     return Math.round(distance * 1000) / 1000; // Round to 3 decimal places
   };
+
+  
 
   return { location, fetchLocation, calculateDistance, watchLocation };
 }

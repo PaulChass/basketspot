@@ -16,7 +16,7 @@ export default function TerrainListScreen() {
   const [terrains, setTerrains] = useState<Terrain[]>([]);
   const [terrainName, setTerrainName] = useState('');
   const router = useRouter();
-  const { location, fetchLocation, watchLocation, calculateDistance } = useGeolocation();
+  const { location, fetchLocation, calculateDistance } = useGeolocation();
   const [username, setUsername] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null); 
   const [usernameInput, setUsernameInput] = useState(''); 
@@ -109,7 +109,7 @@ export default function TerrainListScreen() {
       const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
       const fetchedPlayers = playersSnapshot.docs.map(doc => ({ ...doc.data() }));
       const playerExists = fetchedPlayers.some(player => player.name === username); 
-      if (!playerExists) {
+      if (!playerExists && username !== '') {
         await addDoc(collection(db, `terrains/${terrain.id}/players`), {
           name: username,
           avatar: avatar,
@@ -122,7 +122,6 @@ export default function TerrainListScreen() {
       }
     
     } else {
-      console.log('User is not within 5 km of the terrain:', terrain.name);
       const terrainRef = doc(db, 'terrains', terrain.id);
       const randomDelay = Math.floor(Math.random() * 4000) + 1000; 
       await new Promise((resolve) => setTimeout(resolve, randomDelay));
@@ -151,18 +150,14 @@ export default function TerrainListScreen() {
       snapshot.docs.forEach((doc) => {
         const terrain: Terrain = { id: doc.id, ...doc.data() } as Terrain;
 
-        // Calculate distance if location is available
         if (terrain.location && location?.coords) {
           const distance = calculateDistance(location.coords, terrain.location);
           terrain.distance = distance;
-
-          locationIsInRange(distance, terrain); // Check if the user is within range
-          
+          locationIsInRange(distance, terrain); 
         } else {
           terrain.distance = null;
         }
 
-        // Add terrain to state
         setTerrains((prevTerrains) => {
           const updatedTerrains = [...prevTerrains];
           const index = updatedTerrains.findIndex((t) => t.id === terrain.id);

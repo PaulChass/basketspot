@@ -49,8 +49,8 @@ export default function TerrainDetailScreen() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, `terrains/${id}/players`), (snapshot) => {
       const updatedPlayers = snapshot.docs.map((doc) => {
-        const data = doc.data() as Player;
-        return {  ...data };
+        const data = doc.data() as PlayerDoc;
+        return { id: doc.id, ...data };
       });
       setPlayers(updatedPlayers);
     });
@@ -61,14 +61,14 @@ export default function TerrainDetailScreen() {
   const handleAddNow = async () => {
     try {
       const newPlayer = {
-        name: playername === '' ? 'anon' : playername,
+        name: playername === '' ? 'Anon' : playername,
         status: 'present',
       };
   
       const docRef = await addDoc(collection(db, `terrains/${id}/players`), newPlayer);
       setPlayers([...players, { id: docRef.id, ...newPlayer }]);
-      setPlayerName('');
-
+      setPlayerName(''); // Clear input field after adding player
+      
       if (typeof id !== 'string') {
         throw new Error('Invalid terrain ID');
       }
@@ -167,7 +167,7 @@ export default function TerrainDetailScreen() {
       />
       
       <View style={styles.buttonContainer}>
-        <Button title={t('addPlayer')} onPress={handleAddNow} />
+        <Button title={t('addPlayer')} onPress={() => handleAddNow} />
       </View>
      
     </ThemedView>
