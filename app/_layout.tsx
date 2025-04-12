@@ -8,9 +8,9 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from 'react-i18next';
-import '../i18n'; // Import i18n configuration
+import '../i18n'; 
+import { authenticateUser } from '@/utils/authService'; 
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -19,6 +19,9 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  useEffect(() => {
+    authenticateUser(); // Ensure users are authenticated
+  }, []);
 
   useEffect(() => {
     if (loaded) {

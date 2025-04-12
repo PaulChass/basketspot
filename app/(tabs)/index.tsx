@@ -13,14 +13,32 @@ import Storage from '@/utils/storage';
 
 export default function TerrainListScreen() {
   const { t } = useTranslation();
-  const [terrains, setTerrains] = useState([]);
+  const [terrains, setTerrains] = useState<Terrain[]>([]);
   const [terrainName, setTerrainName] = useState('');
   const router = useRouter();
   const { location, fetchLocation, watchLocation, calculateDistance } = useGeolocation();
-  const [username, setUsername] = useState(''); // State for username
-  const [usernameInput, setUsernameInput] = useState(''); // State for username input
+  const [username, setUsername] = useState('');
+  const [avatar, setAvatar] = useState<string | null>(null); 
+  const [usernameInput, setUsernameInput] = useState(''); 
 
 
+  
+  interface Terrain {
+    id: string;
+    name: string;
+    location: [number ,number ] | null;
+    distance: number | null;
+    playersCount: number;
+  }
+
+  interface Player {
+    id: string;
+    name: string;
+    status: string;
+    avatar?: string;
+  }
+
+ 
    // Retrieve username from AsyncStorage when the component mounts
   useEffect(() => {
     const loadUsername = async () => {
@@ -37,7 +55,23 @@ export default function TerrainListScreen() {
     loadUsername();
   }, []);
 
-  const handleUsernameChange = async (text) => {
+  // Retrieve avatar from AsyncStorage when the component mounts
+  useEffect(() => {
+    const loadAvatar = async () => {
+      try {
+        const storedAvatar = await Storage.getItem('avatar');
+        if (storedAvatar) {
+          setAvatar(storedAvatar);
+        }
+      } catch (error) {
+        console.error('Error loading avatar:', error);
+      }
+    };
+    loadAvatar();
+  }
+, []);
+
+  const handleUsernameChange = async (text: string) => {
     setUsername(text);
     try {
       await Storage.setItem('username', text);
@@ -51,26 +85,34 @@ export default function TerrainListScreen() {
     fetchLocation(); 
     // Fetch terrains from Firestore
     const unsubscribe = onSnapshot(collection(db, 'terrains'), (snapshot) => {
-      const fetchedTerrains = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setTerrains(fetchedTerrains);
+      const fetchedTerrains = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name ||null,
+          location: data.location ||null,
+        };
+      });
+      setTerrains(fetchedTerrains as Terrain[]);
     });
     return () => unsubscribe();
   }, []);
 
-  const locationIsInRange = async (distance, terrain) => {    
-    if (distance <= 1) {
-      const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
+  const locationIsInRange = async (distance: number, terrain: Terrain) => {    
+    if (distance === null) {
+      return;
+    }
+    if (distance <= 2) {
+      const randomDelay = Math.floor(Math.random() * 4000) + 1000; 
       await new Promise((resolve) => setTimeout(resolve, randomDelay));
       const terrainRef = doc(db, 'terrains', terrain.id);
       const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
-      const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with actual user ID
+      const fetchedPlayers = playersSnapshot.docs.map(doc => ({ ...doc.data() }));
+      const playerExists = fetchedPlayers.some(player => player.name === username); 
       if (!playerExists) {
         await addDoc(collection(db, `terrains/${terrain.id}/players`), {
-          name: username, // Replace with actual user name
+          name: username,
+          avatar: avatar,
           status: 'present',
         });
         const playersCount = fetchedPlayers.length;
@@ -78,21 +120,22 @@ export default function TerrainListScreen() {
           playersCount: playersCount + 1,
         });
       }
+    
     } else {
       console.log('User is not within 5 km of the terrain:', terrain.name);
       const terrainRef = doc(db, 'terrains', terrain.id);
-      const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
+      const randomDelay = Math.floor(Math.random() * 4000) + 1000; 
       await new Promise((resolve) => setTimeout(resolve, randomDelay));
       const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
-      const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with actual user ID
+      const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id:doc.id ,...doc.data()  }as Player));
+      const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with  user ID
       if (playerExists) {
         await updateDoc(terrainRef, {
           playersCount: Math.max(0, fetchedPlayers.length - 1),
         });
-        const playerDoc = fetchedPlayers.find(player => player.name === username); // Replace with actual user ID
+        const playerDoc = fetchedPlayers.find(player => player.name === username); // Replace with user ID
         if (playerDoc) {
-          await deleteDoc(doc(db, `terrains/${terrain.id}/players`, playerDoc.id));
+          await deleteDoc(doc(db, `terrains/${terrain.id}/players`, playerDoc.id)); // Delete the player document
         }
         console.log('User removed from the terrain players list:', terrain.name);
       }
@@ -106,7 +149,7 @@ export default function TerrainListScreen() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'terrains'), (snapshot) => {
       snapshot.docs.forEach((doc) => {
-        const terrain = { id: doc.id, ...doc.data() };
+        const terrain: Terrain = { id: doc.id, ...doc.data() } as Terrain;
 
         // Calculate distance if location is available
         if (terrain.location && location?.coords) {

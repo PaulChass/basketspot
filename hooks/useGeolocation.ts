@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
 
 export function useGeolocation() {
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
 
   // Fetch current location
   const fetchLocation = async () => {
@@ -17,7 +17,7 @@ export function useGeolocation() {
     }
   };
 
-  const watchLocation = async (onLocationChange) => {
+  const watchLocation = async (onLocationChange: (location: Location.LocationObject) => void) => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
       return await Location.watchPositionAsync(
@@ -33,7 +33,7 @@ export function useGeolocation() {
 
 
   // Calculate distance between two points
-  const calculateDistance = (loc1, loc2) => {
+  const calculateDistance = (loc1: { latitude: number; longitude: number }, loc2: [number, number]) => {
     const lat1 = loc1.latitude;
     const lon1 = loc1.longitude;
     const lat2 = loc2[0];
