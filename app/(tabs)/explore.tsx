@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Storage from '@/utils/storage';
 import * as ImagePicker from 'expo-image-picker'; 
+import { SvgUri } from 'react-native-svg';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { predefinedAvatars } from '@/utils/avatars'; // Import your predefined avatars
@@ -115,7 +116,7 @@ export default function TabTwoScreen() {
         <View style={styles.container}>
       <TouchableOpacity onPress={() => setIsModalVisible(true)}>
         {avatar ? (
-          <Image source={{ uri: avatar }} style={styles.avatar} />
+              <SvgUri uri={avatar} width={80} height={80} style={styles.avatarOption} />
         ) : (
           <View style={styles.avatarPlaceholder}>
             <Button title="Select Avatar" onPress={() => setIsModalVisible(true)} />
@@ -130,8 +131,8 @@ export default function TabTwoScreen() {
           numColumns={8}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleAvatarSelect(item)}>
-              <Image source={{ uri: item }} style={styles.avatarOption} />
-            </TouchableOpacity>
+              <SvgUri uri={item} width={80} height={80} style={styles.avatarOption} />
+              </TouchableOpacity>
           )}
         />
         <Button title="Close" onPress={() => setIsModalVisible(false)} />

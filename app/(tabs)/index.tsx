@@ -16,7 +16,7 @@ export default function TerrainListScreen() {
   const [terrains, setTerrains] = useState<Terrain[]>([]);
   const [terrainName, setTerrainName] = useState('');
   const router = useRouter();
-  const { location, fetchLocation, calculateDistance } = useGeolocation();
+  const { location, calculateDistance } = useGeolocation();
   const [username, setUsername] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null); 
   const [usernameInput, setUsernameInput] = useState(''); 
@@ -82,7 +82,6 @@ export default function TerrainListScreen() {
   };
 
   useEffect(() => {
-    fetchLocation(); 
     // Fetch terrains from Firestore
     const unsubscribe = onSnapshot(collection(db, 'terrains'), (snapshot) => {
       const fetchedTerrains = snapshot.docs.map((doc) => {

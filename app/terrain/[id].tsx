@@ -8,6 +8,9 @@ import { db } from '@/firebase';
 import { useTranslation } from 'react-i18next'; 
 import { increment, updateDoc, onSnapshot } from 'firebase/firestore'; 
 import FontAwesome from 'react-native-vector-icons/FontAwesome'; 
+import { SvgUri } from 'react-native-svg';
+
+
 
 export default function TerrainDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -60,6 +63,7 @@ export default function TerrainDetailScreen() {
 
   const handleAddNow = async () => {
     try {
+      console.log('Adding player:', playername);
       const newPlayer = {
         name: playername === '' ? 'Anon' : playername,
         status: 'present',
@@ -138,9 +142,10 @@ export default function TerrainDetailScreen() {
         renderItem={({ item }) => (
           
           <View style={styles.playerRow}>
+                          {item.avatar &&  <SvgUri uri={item.avatar} width={80} height={80} style={styles.avatarOption} />} 
+
             <ThemedText style={styles.player}>
               {item.name} {item.status !== 'present' && `(${item.status})`}
-              {item.avatar && <Image source={{ uri: item.avatar }} style={{ width: 50, height: 50 }} />} {/* Display avatar if available */}
 
             </ThemedText>
 
@@ -167,7 +172,7 @@ export default function TerrainDetailScreen() {
       />
       
       <View style={styles.buttonContainer}>
-        <Button title={t('addPlayer')} onPress={() => handleAddNow} />
+        <Button title={t('addPlayer')} onPress={ handleAddNow} />
       </View>
      
     </ThemedView>
@@ -180,8 +185,8 @@ const styles = StyleSheet.create({
   wantedButtonContainer: { marginVertical: 2, width: '100%' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
   subtitle: { fontSize: 18, marginBottom: 8 },
-  playerRow: {width:'100%'},
-  player: { fontSize: 16, marginBottom: 4, flexDirection: 'row', alignItems: 'center' },
+  playerRow: {width:'100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, paddingVertical: 4, paddingHorizontal: 8, borderRadius: 8, borderWidth: 1, borderColor: 'grey',minHeight: 50}, 
+  player: { fontSize: 16, position: 'absolute', left: 100 }, // Position the player name
   input: { color: 'grey' },
   avatarOption: { width: 40, height: 40, borderRadius: 20, marginRight: 8 }, // Define avatarOption style
   trashIcon: { position: 'absolute', right: 4 }, // Position the trash icon
