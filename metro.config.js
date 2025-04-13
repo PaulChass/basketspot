@@ -4,11 +4,8 @@ module.exports = (() => {
   const config = getDefaultConfig(__dirname);
 
   config.transformer = {
-    babelTransformerPath: require.resolve('react-native-svg-transformer'),
-  };
-  config.resolver = {
-    assetExts: config.resolver.assetExts.filter((ext) => ext !== 'svg'),
-    sourceExts: [...config.resolver.sourceExts, 'svg'],
+    ...config.transformer,
+    assetPlugins: ['expo-asset/tools/hashAssetFiles'],
   };
 
   return config;

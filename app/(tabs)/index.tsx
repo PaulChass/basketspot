@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button, Alert, TextInput } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button, Alert, TextInput, Animated } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useRouter } from 'expo-router';
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc , getDoc, getDocs } from 'firebase/firestore';
@@ -19,7 +19,9 @@ export default function TerrainListScreen() {
   const { location, calculateDistance } = useGeolocation();
   const [username, setUsername] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null); 
-  const [usernameInput, setUsernameInput] = useState(''); 
+  const [usernameInput, setUsernameInput] = useState('');
+  const borderColorAnimation = useRef(new Animated.Value(0)).current;
+ 
 
 
   
@@ -28,6 +30,7 @@ export default function TerrainListScreen() {
     name: string;
     location: [number ,number ] | null;
     distance: number | null;
+    wanted: string;
     playersCount: number;
   }
 
@@ -200,6 +203,36 @@ export default function TerrainListScreen() {
     }
   };
 
+  const isFuture = (dateString: string, currentDate: Date) => {
+    const date = new Date(dateString);
+    return date > currentDate;
+  };
+
+
+  useEffect(() => {
+    // Start the border color animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(borderColorAnimation, {
+          toValue: 1,
+          duration: 1000, // 1 second to transition to red
+          useNativeDriver: false,
+        }),
+        Animated.timing(borderColorAnimation, {
+          toValue: 0,
+          duration: 1000, // 1 second to transition back to white
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  }, [borderColorAnimation]);
+
+  // Interpolate the border color from white to red
+  const interpolatedBorderColor = borderColorAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['white', 'red'], // From white to red
+  });
+
  if(username === '') {
   return (
     <View style={styles.container}>
@@ -231,13 +264,26 @@ return (
       data={terrains}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.terrainItem}
-          onPress={() => router.push(`/terrain/${item.id}`)}
+        <Animated.View
+          style={[
+            styles.terrainItem,
+            isFuture(item.wanted, new Date()) 
+             && { borderColor: interpolatedBorderColor, borderWidth: 4 },
+          ]}
         >
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={() => router.push(`/terrain/${item.id}`)}
+          >
+        
           <View style={styles.row}>
             <View style={styles.info}>
-              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.name}>{item.name}
+              {isFuture(item.wanted, new Date()) && (
+                 '-' +
+                 t('playersWanted')
+              )}
+              </Text>
               <View style={styles.row}>
                 <FontAwesome name="users" size={16} color="#555" />
                 <Text style={styles.details}>
@@ -253,11 +299,12 @@ return (
                 </Text>
               </View>
             </View>
-            
             <Text style={styles.link}>{t('view')}</Text>
           </View>
-        </TouchableOpacity>
-      )}
+          </TouchableOpacity>
+        </Animated.View>
+
+)}
     />
     <View style={{ margin: 40 }}>
       <TextInput
@@ -279,6 +326,16 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 8,
     backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  terrainItemWanted: {
+    padding: 16,
+    marginBottom: 8,
+    backgroundColor: '#f9f9f9',
+    borderColor: 'rgba(180, 0, 0, 1)',
+    borderWidth: 4,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',

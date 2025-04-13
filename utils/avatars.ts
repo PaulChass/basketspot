@@ -1,95 +1,32 @@
-export const predefinedAvatars = [
-    // Male Avatars
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Prescription01&hairColor=Brown&facialHairType=BeardLight&clotheType=Hoodie&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortCurly&accessoriesType=Round&hairColor=Black&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Default&skinColor=DarkBrown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairSides&accessoriesType=Sunglasses&hairColor=Blonde&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairTheCaesar&accessoriesType=Blank&hairColor=Red&facialHairType=MoustacheFancy&clotheType=BlazerSweater&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Serious&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairFrizzle&accessoriesType=Kurt&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Squint&eyebrowType=AngryNatural&mouthType=Smile&skinColor=DarkBrown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairDreads01&accessoriesType=Blank&hairColor=BlondeGolden&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Brown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Wayfarers&hairColor=Black&facialHairType=BeardMajestic&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortRound&accessoriesType=Blank&hairColor=Brown&facialHairType=BeardMedium&clotheType=Hoodie&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairSides&accessoriesType=Prescription02&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=DarkBrown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairFrizzle&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Round&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Squint&eyebrowType=AngryNatural&mouthType=Serious&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortCurly&accessoriesType=Blank&hairColor=Brown&facialHairType=BeardLight&clotheType=Hoodie&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairSides&accessoriesType=Sunglasses&hairColor=Black&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=DarkBrown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Kurt&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairTheCaesar&accessoriesType=Blank&hairColor=BlondeGolden&facialHairType=BeardMajestic&clotheType=BlazerShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=Brown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Prescription01&hairColor=Brown&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortCurly&accessoriesType=Wayfarers&hairColor=Black&facialHairType=BeardLight&clotheType=Hoodie&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=DarkBrown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairSides&accessoriesType=Round&hairColor=BrownDark&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Sunglasses&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairFrizzle&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Squint&eyebrowType=AngryNatural&mouthType=Serious&skinColor=Light',
+const generateRandomAvatarUrl = (gender: 'male' | 'female') => {
+  const topTypes = gender === 'male'
+    ? ['ShortHairShortFlat', 'ShortHairShortCurly', 'ShortHairSides', 'ShortHairTheCaesar', 'ShortHairFrizzle', 'ShortHairDreads01', 'ShortHairShortRound']
+    : ['LongHairStraight', 'LongHairCurly', 'LongHairStraight2', 'LongHairFrida', 'LongHairBigHair'];
 
-    'https://avataaars.io/?avatarStyle=Circle&topType=NoHair&accessoriesType=Blank&hairColor=Black&facialHairType=BeardLight&clotheType=Hoodie&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=Brown&facialHairType=BeardLight&clotheType=BlazerShirt&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortRound&accessoriesType=Blank&hairColor=Black&facialHairType=BeardMedium&clotheType=Hoodie&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairDreads01&accessoriesType=Blank&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairFrizzle&accessoriesType=Blank&hairColor=Red&facialHairType=MoustacheFancy&clotheType=ShirtCrewNeck&eyeType=Squint&eyebrowType=AngryNatural&mouthType=Serious&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairTheCaesar&accessoriesType=Blank&hairColor=BrownDark&facialHairType=BeardMajestic&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=DarkBrown',
-'https://avataaars.io/?avatarStyle=Circle&topType=NoHair&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
+  const accessoriesTypes = ['Blank', 'Prescription01', 'Prescription02', 'Round', 'Sunglasses', 'Wayfarers', 'Kurt'];
+  const hairColors = ['Brown', 'Black', 'Blonde', 'Red', 'BrownDark', 'BlondeGolden'];
+  const facialHairTypes = gender === 'male' ? ['Blank', 'BeardLight', 'BeardMedium', 'BeardMajestic', 'MoustacheFancy'] : ['Blank'];
+  const clotheTypes = ['Hoodie', 'GraphicShirt', 'BlazerShirt', 'ShirtCrewNeck', 'ShirtVNeck', 'BlazerSweater'];
+  const eyeTypes = ['Default', 'Happy', 'Wink', 'Squint'];
+  const eyebrowTypes = ['Default', 'DefaultNatural', 'RaisedExcited', 'AngryNatural', 'UpDown'];
+  const mouthTypes = ['Smile', 'Default', 'Serious'];
+  const skinColors = ['Light', 'Brown', 'DarkBrown'];
 
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortCurly&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairDreads02&accessoriesType=Blank&hairColor=BlondeGolden&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Happy&eyebrowType=RaisedExcited&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairSides&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=ShirtScoopNeck&eyeType=Squint&eyebrowType=UpDownNatural&mouthType=Default&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairTheCaesarSidePart&accessoriesType=Blank&hairColor=Black&facialHairType=BeardLight&clotheType=Hoodie&eyeType=Default&eyebrowType=Default&mouthType=Smile&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-   'https://avataaars.io/?avatarStyle=Circle&topType=NoHair&accessoriesType=Blank&hairColor=Black&facialHairType=MoustacheFancy&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Light',
+  return `https://avataaars.io/?avatarStyle=Circle&topType=${randomItem(topTypes)}&accessoriesType=${randomItem(accessoriesTypes)}&hairColor=${randomItem(hairColors)}&facialHairType=${randomItem(facialHairTypes)}&clotheType=${randomItem(clotheTypes)}&eyeType=${randomItem(eyeTypes)}&eyebrowType=${randomItem(eyebrowTypes)}&mouthType=${randomItem(mouthTypes)}&skinColor=${randomItem(skinColors)}`;
+};
 
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortCurly&accessoriesType=Blank&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairSides&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=Hoodie&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairFrizzle&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=Brown&facialHairType=BeardLight&clotheType=BlazerSweater&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortRound&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairDreads01&accessoriesType=Blank&hairColor=BlondeGolden&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairFrizzle&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Squint&eyebrowType=AngryNatural&mouthType=Serious&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairTheCaesar&accessoriesType=Blank&hairColor=BrownDark&facialHairType=BeardMajestic&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=DarkBrown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortRound&accessoriesType=Blank&hairColor=Black&facialHairType=BeardMedium&clotheType=Hoodie&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=DarkBrown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairDreads01&accessoriesType=Blank&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Brown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairFrizzle&accessoriesType=Blank&hairColor=Red&facialHairType=MoustacheFancy&clotheType=ShirtCrewNeck&eyeType=Squint&eyebrowType=AngryNatural&mouthType=Serious&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairTheCaesar&accessoriesType=Blank&hairColor=BrownDark&facialHairType=BeardMajestic&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=DarkBrown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortCurly&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Default&skinColor=Brown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairDreads02&accessoriesType=Blank&hairColor=BlondeGolden&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Happy&eyebrowType=RaisedExcited&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairSides&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=ShirtScoopNeck&eyeType=Squint&eyebrowType=UpDownNatural&mouthType=Default&skinColor=DarkBrown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairTheCaesarSidePart&accessoriesType=Blank&hairColor=Black&facialHairType=BeardLight&clotheType=Hoodie&eyeType=Default&eyebrowType=Default&mouthType=Smile&skinColor=Brown',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=Brown&facialHairType=BeardLight&clotheType=BlazerSweater&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=Light',
-  'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=Hoodie&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=Light',
-'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortCurly&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairSides&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Light',
-'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairTheCaesar&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-'https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-  // Female Avatars
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairCurly&accessoriesType=Round&hairColor=Black&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight2&accessoriesType=Sunglasses&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairBigHair&accessoriesType=Kurt&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Squint&eyebrowType=AngryNatural&mouthType=Smile&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Prescription01&hairColor=BlondeGolden&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairCurly&accessoriesType=Wayfarers&hairColor=Black&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight2&accessoriesType=Blank&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Round&hairColor=Red&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairBigHair&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairCurly&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight2&accessoriesType=Blank&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairBigHair&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Prescription02&hairColor=BlondeGolden&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairCurly&accessoriesType=Kurt&hairColor=Black&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight2&accessoriesType=Blank&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairBigHair&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Default&skinColor=Brown',  
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairCurly&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight2&accessoriesType=Blank&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairBigHair&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=BlondeGolden&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairCurly&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=ShirtCrewNeck&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight2&accessoriesType=Blank&hairColor=Blonde&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Blank&hairColor=Red&facialHairType=Blank&clotheType=GraphicShirt&eyeType=Happy&eyebrowType=UpDown&mouthType=Smile&skinColor=DarkBrown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairBigHair&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=ShirtVNeck&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Default&skinColor=Brown',
-    'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=Brown&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Happy&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-];
+const randomItem = (array: string[]) => array[Math.floor(Math.random() * array.length)];
+
+export const predefinedAvatars = () => {
+  console.log('Generating predefined avatars...');
+  
+  const avatars: string[] = [];
+  for (let i = 0; i < 80; i++) {
+    avatars.push(generateRandomAvatarUrl('male'));
+  }
+  for (let i = 0; i < 40; i++) {
+    avatars.push(generateRandomAvatarUrl('female'));
+  }
+  console.log('Predefined avatars:', avatars);
+  return avatars;
+};

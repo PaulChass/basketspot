@@ -8,10 +8,12 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Storage from '@/utils/storage';
 import * as ImagePicker from 'expo-image-picker'; 
+import { Platform } from 'react-native';
 import { SvgUri } from 'react-native-svg';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { predefinedAvatars } from '@/utils/avatars'; // Import your predefined avatars
+import { set } from 'lodash';
 
 
 export default function TabTwoScreen() {
@@ -22,9 +24,10 @@ export default function TabTwoScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const storage = getStorage();
   const db = getFirestore();
+  const [avatars, setAvatars] = useState<string[]>([]); // State to hold the list of avatars
+
 
  
-
   // Charger le nom d'utilisateur et l'avatar depuis AsyncStorage
   useEffect(() => {
     const loadProfile = async () => {
@@ -42,6 +45,8 @@ export default function TabTwoScreen() {
     };
 
     loadProfile();
+    setAvatars(predefinedAvatars()); // Set the predefined avatars when the component mounts
+
   }, []);
 
   // Sauvegarder le nom d'utilisateur dans AsyncStorage
@@ -116,8 +121,13 @@ export default function TabTwoScreen() {
         <View style={styles.container}>
       <TouchableOpacity onPress={() => setIsModalVisible(true)}>
         {avatar ? (
+          // Display the selected avatar
+          Platform.OS === 'web' ? (
+            <Image source={{ uri: avatar }} style={styles.avatar} />
+          ) : (
               <SvgUri uri={avatar} width={80} height={80} style={styles.avatarOption} />
-        ) : (
+          )
+            ) : (
           <View style={styles.avatarPlaceholder}>
             <Button title="Select Avatar" onPress={() => setIsModalVisible(true)} />
           </View>
@@ -126,12 +136,18 @@ export default function TabTwoScreen() {
 
       <Modal visible={isModalVisible} animationType="slide">
         <FlatList
-          data={predefinedAvatars}
+          data={avatars}
           keyExtractor={(item, index) => index.toString()}
-          numColumns={8}
+          numColumns={4}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleAvatarSelect(item)}>
+              { Platform.OS === 'web' ? (
+              <Image source={{ uri: item }} style={styles.avatarOption} />
+              )  
+              : (
               <SvgUri uri={item} width={80} height={80} style={styles.avatarOption} />
+              )
+              }
               </TouchableOpacity>
           )}
         />

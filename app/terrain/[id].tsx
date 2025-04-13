@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Button, StyleSheet, FlatList, TextInput, Image } from 'react-native';
+import { View, Button, StyleSheet, FlatList, TextInput, Image, Platform } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { increment, updateDoc, onSnapshot } from 'firebase/firestore'; 
 import FontAwesome from 'react-native-vector-icons/FontAwesome'; 
 import { SvgUri } from 'react-native-svg';
+
 
 
 
@@ -129,11 +130,27 @@ export default function TerrainDetailScreen() {
     }
   };
 
+  const updateCourtAsWanted = async () => {
+    console.log('Updating court as wanted:', id);
+    try {
+      if (typeof id !== 'string') {
+        throw new Error('Invalid terrain ID');
+      }
+      const terrainRef = doc(db, 'terrains', id);
+      await updateDoc(terrainRef, {
+        wanted: new Date(Date.now() + 60 * 60 * 1000).toISOString() // Set the wanted time to 60 minutes from now
+      });
+      console.log('Court updated as wanted:', id);
+    } catch (error) {
+      console.error('Error updating court as wanted:', error);
+    }
+  };
+
   return (
     <ThemedView style={styles.container}>
       <ThemedText style={styles.title}>{courtName || t('courtName')}</ThemedText>
       <View style={styles.wantedButtonContainer}>
-        <Button title={t('playersWanted')} onPress={() => {console.log('players wanted')}} />
+        <Button title={t('playersWanted')} onPress={updateCourtAsWanted} />
       </View>
       <ThemedText style={styles.subtitle}>{t('playersList')}</ThemedText>
       <FlatList
@@ -142,8 +159,13 @@ export default function TerrainDetailScreen() {
         renderItem={({ item }) => (
           
           <View style={styles.playerRow}>
-                          {item.avatar &&  <SvgUri uri={item.avatar} width={80} height={80} style={styles.avatarOption} />} 
-
+                          {item.avatar &&
+                          (Platform.OS === 'web' ? ( 
+                            <Image source={{ uri: item.avatar }} style={styles.avatarOption} />
+                          ) : (
+                            <SvgUri uri={item.avatar} width={80} height={80} style={styles.avatarOption} />
+                          ))
+                          }
             <ThemedText style={styles.player}>
               {item.name} {item.status !== 'present' && `(${item.status})`}
 
