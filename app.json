@@ -16,7 +16,13 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.crapdev.basketspot"
+      "package": "com.crapdev.basketspot",
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -33,7 +39,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "react-native-background-fetch"
     ],
     "experiments": {
       "typedRoutes": true
@@ -46,9 +53,7 @@
         "projectId": "0b08d6b7-3e7c-41ae-8f53-17d6fc330782"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/0b08d6b7-3e7c-41ae-8f53-17d6fc330782"
     }

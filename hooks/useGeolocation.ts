@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
-import BackgroundGeolocation from 'react-native-background-geolocation';
-import { use } from 'i18next';
+
 
 
 export function useGeolocation() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
-
   // Fetch current location
   const fetchLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -20,7 +18,7 @@ export function useGeolocation() {
     }
   };
 
-  const watchLocation = async (onLocationChange: (location: Location.LocationObject) => void) => {
+  const watchLocation = async (onLocationChange: (location: Location.LocationObject) => void): Promise<Location.LocationSubscription | null> => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
       return await Location.watchPositionAsync(
@@ -35,7 +33,7 @@ export function useGeolocation() {
   };
 
   useEffect(() => {
-    fetchLocation();
+    fetchLocation().catch((error) => console.error('Error fetching location:', error));
     let subscription: Location.LocationSubscription | null = null;
 
     const startWatching = async () => {
@@ -44,7 +42,7 @@ export function useGeolocation() {
       });
     };
 
-    startWatching();
+    startWatching().catch((error) => console.error('Error starting location watch:', error));
 
     // Cleanup function to stop watching location when component unmounts   
     return () => {
@@ -72,6 +70,5 @@ export function useGeolocation() {
     const distance = R * c;
     return Math.round(distance * 1000) / 1000; // Round to 3 decimal places
   };
-  console.log('Current location:', location);
   return { location, fetchLocation, calculateDistance, watchLocation };
 }

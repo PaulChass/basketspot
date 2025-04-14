@@ -10,7 +10,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from 'react-i18next';
 import '../i18n'; 
 import { authenticateUser } from '@/utils/authService'; 
-
+import { useBackgroundGeolocation } from '@/hooks/useBackgroundGeolocation';
+import '@/BackgroundFetchHeadlessTask';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -22,6 +23,8 @@ export default function RootLayout() {
   useEffect(() => {
     authenticateUser(); // Ensure users are authenticated
   }, []);
+
+  useBackgroundGeolocation(); // Start background geolocation tracking
 
   useEffect(() => {
     if (loaded) {
