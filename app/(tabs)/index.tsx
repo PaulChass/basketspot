@@ -2,13 +2,14 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button, Alert, TextInput, Animated } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useRouter } from 'expo-router';
-import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc , getDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc , getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { useTranslation } from 'react-i18next';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useGeolocation } from '@/hooks/useGeolocation';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import Storage from '@/utils/storage';  
+import SelectAvatar from '@/components/SelectAvatar';
 
 
 export default function TerrainListScreen() {
@@ -18,6 +19,7 @@ export default function TerrainListScreen() {
   const router = useRouter();
   const { location, calculateDistance } = useGeolocation();
   const [username, setUsername] = useState('');
+  const [userId, setUserId] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null); 
   const [usernameInput, setUsernameInput] = useState('');
   const borderColorAnimation = useRef(new Animated.Value(0)).current;
@@ -44,35 +46,28 @@ export default function TerrainListScreen() {
  
    // Retrieve username from AsyncStorage when the component mounts
   useEffect(() => {
-    const loadUsername = async () => {
+    const loadUser = async () => {
       try {
         const storedUsername = await Storage.getItem('username');
+        const storedAvatar = await Storage.getItem('avatar');
+        const storedUserId = await Storage.getItem('userId');
         if (storedUsername) {
           setUsername(storedUsername);
         }
-      } catch (error) {
-        console.error('Error loading username:', error);
-      }
-    };
-
-    loadUsername();
-  }, []);
-
-  // Retrieve avatar from AsyncStorage when the component mounts
-  useEffect(() => {
-    const loadAvatar = async () => {
-      try {
-        const storedAvatar = await Storage.getItem('avatar');
         if (storedAvatar) {
           setAvatar(storedAvatar);
         }
+        if (storedUserId) {
+          setUserId(storedUserId);
+        }
       } catch (error) {
-        console.error('Error loading avatar:', error);
+        console.error('Error loading user:', error);
       }
     };
-    loadAvatar();
-  }
-, []);
+    loadUser;
+  }, []);
+
+  
 
   const handleUsernameChange = async (text: string) => {
     setUsername(text);
@@ -82,6 +77,11 @@ export default function TerrainListScreen() {
     } catch (error) {
       console.error('Error saving username:', error);
     }
+  };
+
+  const handleAvatarSelect = async (selectedAvatar: string) => {
+    setAvatar(selectedAvatar);
+    await Storage.setItem('avatar', selectedAvatar);
   };
 
   useEffect(() => {
@@ -110,13 +110,14 @@ export default function TerrainListScreen() {
       const terrainRef = doc(db, 'terrains', terrain.id);
       const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
       const fetchedPlayers = playersSnapshot.docs.map(doc => ({ ...doc.data() }));
-      const playerExists = fetchedPlayers.some(player => player.name === username); 
+      const playerExists = fetchedPlayers.some(player => player.id === userId); 
       if (!playerExists && username !== '') {
         await addDoc(collection(db, `terrains/${terrain.id}/players`), {
+          id: userId,
           name: username,
-          avatar: avatar,
           status: 'present',
-        });
+          avatar: avatar,
+        } as Player);
         const playersCount = fetchedPlayers.length;
         await updateDoc(terrainRef, {
           playersCount: playersCount + 1,
@@ -243,7 +244,14 @@ export default function TerrainListScreen() {
         onChangeText={setUsernameInput}
         style={styles.input}
       />
-      <Button title={t('saveUsername')} onPress={() => handleUsernameChange(usernameInput)} />
+      <SelectAvatar
+          avatar={avatar}
+          onAvatarSelect={handleAvatarSelect}
+        />
+        <View style={{ margin: 10 }}>
+          </View>
+       
+      <Button title={t('save')} onPress={() => handleUsernameChange(usernameInput)}  />
     </View>
   );
 }

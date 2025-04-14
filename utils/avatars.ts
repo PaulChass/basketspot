@@ -3,14 +3,14 @@ const generateRandomAvatarUrl = (gender: 'male' | 'female') => {
     ? ['ShortHairShortFlat', 'ShortHairShortCurly', 'ShortHairSides', 'ShortHairTheCaesar', 'ShortHairFrizzle', 'ShortHairDreads01', 'ShortHairShortRound']
     : ['LongHairStraight', 'LongHairCurly', 'LongHairStraight2', 'LongHairFrida', 'LongHairBigHair'];
 
-  const accessoriesTypes = ['Blank', 'Prescription01', 'Prescription02', 'Round', 'Sunglasses', 'Wayfarers', 'Kurt'];
-  const hairColors = ['Brown', 'Black', 'Blonde', 'Red', 'BrownDark', 'BlondeGolden'];
-  const facialHairTypes = gender === 'male' ? ['Blank', 'BeardLight', 'BeardMedium', 'BeardMajestic', 'MoustacheFancy'] : ['Blank'];
-  const clotheTypes = ['Hoodie', 'GraphicShirt', 'BlazerShirt', 'ShirtCrewNeck', 'ShirtVNeck', 'BlazerSweater'];
+  const accessoriesTypes = ['Blank', 'Round','Blank','Blank','Blank','Blank','Blank'];
+  const hairColors = ['Brown', 'Black', 'Blonde', 'Red', 'BrownDark', 'BlondeGolden','BrownLight','Brown','Brown','Brown','Black','Black','Blonde'];
+  const facialHairTypes = gender === 'male' ? ['Blank', 'BeardLight', 'BeardMedium', 'BeardMajestic','Blank','Blank','Blank'] : ['Blank'];
+  const clotheTypes = ['Hoodie', 'GraphicShirt', 'ShirtCrewNeck', 'ShirtVNeck'];
   const eyeTypes = ['Default', 'Happy', 'Wink', 'Squint'];
-  const eyebrowTypes = ['Default', 'DefaultNatural', 'RaisedExcited', 'AngryNatural', 'UpDown'];
-  const mouthTypes = ['Smile', 'Default', 'Serious'];
-  const skinColors = ['Light', 'Brown', 'DarkBrown'];
+  const eyebrowTypes = ['Default', 'DefaultNatural'];
+  const mouthTypes = ['Smile', 'Default'];
+  const skinColors = ['Light', 'Brown', 'DarkBrown', 'Black', 'Pale', 'Tanned'];
 
   return `https://avataaars.io/?avatarStyle=Circle&topType=${randomItem(topTypes)}&accessoriesType=${randomItem(accessoriesTypes)}&hairColor=${randomItem(hairColors)}&facialHairType=${randomItem(facialHairTypes)}&clotheType=${randomItem(clotheTypes)}&eyeType=${randomItem(eyeTypes)}&eyebrowType=${randomItem(eyebrowTypes)}&mouthType=${randomItem(mouthTypes)}&skinColor=${randomItem(skinColors)}`;
 };

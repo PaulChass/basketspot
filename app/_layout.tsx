@@ -10,11 +10,12 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from 'react-i18next';
 import '../i18n'; 
 import { authenticateUser } from '@/utils/authService'; 
-import { useBackgroundGeolocation } from '@/hooks/useBackgroundGeolocation';
-import '@/BackgroundFetchHeadlessTask';
+import '@/BackgroundFetchHeadlessTask'; // Remove when building for web
 SplashScreen.preventAutoHideAsync();
+import { useBackgroundGeolocation } from '@/hooks/useBackgroundGeolocation'; // Import your custom hook
 
 export default function RootLayout() {
+    useBackgroundGeolocation(); // Start background geolocation tracking
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
@@ -24,7 +25,6 @@ export default function RootLayout() {
     authenticateUser(); // Ensure users are authenticated
   }, []);
 
-  useBackgroundGeolocation(); // Start background geolocation tracking
 
   useEffect(() => {
     if (loaded) {

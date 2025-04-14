@@ -14,6 +14,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { predefinedAvatars } from '@/utils/avatars'; // Import your predefined avatars
 import { set } from 'lodash';
+import SelectAvatar from '@/components/SelectAvatar';
 
 
 export default function TabTwoScreen() {
@@ -21,10 +22,8 @@ export default function TabTwoScreen() {
   const [isPresenceDetectionAllowed, setIsPresenceDetectionAllowed] = useState(true);
   const [username, setUsername] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null); 
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const storage = getStorage();
   const db = getFirestore();
-  const [avatars, setAvatars] = useState<string[]>([]); // State to hold the list of avatars
 
 
  
@@ -45,7 +44,6 @@ export default function TabTwoScreen() {
     };
 
     loadProfile();
-    setAvatars(predefinedAvatars()); // Set the predefined avatars when the component mounts
 
   }, []);
 
@@ -66,13 +64,7 @@ export default function TabTwoScreen() {
   
   const handleAvatarSelect = async (selectedAvatar: string) => {
     setAvatar(selectedAvatar);
-    setIsModalVisible(false);
-  
-    // Save the avatar URL to AsyncStorage
     await Storage.setItem('avatar', selectedAvatar);
-
-  
-    console.log('Avatar selected and saved:', selectedAvatar);
   };
   
   const changeLanguage = (lng: string) => {
@@ -119,40 +111,10 @@ export default function TabTwoScreen() {
           />
         </ThemedView>
         <View style={styles.container}>
-      <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-        {avatar ? (
-          // Display the selected avatar
-          Platform.OS === 'web' ? (
-            <Image source={{ uri: avatar }} style={styles.avatar} />
-          ) : (
-              <SvgUri uri={avatar} width={80} height={80} style={styles.avatarOption} />
-          )
-            ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Button title="Select Avatar" onPress={() => setIsModalVisible(true)} />
-          </View>
-        )}
-      </TouchableOpacity>
-
-      <Modal visible={isModalVisible} animationType="slide">
-        <FlatList
-          data={avatars}
-          keyExtractor={(item, index) => index.toString()}
-          numColumns={4}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleAvatarSelect(item)}>
-              { Platform.OS === 'web' ? (
-              <Image source={{ uri: item }} style={styles.avatarOption} />
-              )  
-              : (
-              <SvgUri uri={item} width={80} height={80} style={styles.avatarOption} />
-              )
-              }
-              </TouchableOpacity>
-          )}
+        <SelectAvatar
+          avatar={avatar}
+          onAvatarSelect={handleAvatarSelect}
         />
-        <Button title="Close" onPress={() => setIsModalVisible(false)} />
-      </Modal>
     </View>
       </View>
     </ParallaxScrollView>
