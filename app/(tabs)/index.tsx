@@ -7,7 +7,7 @@ import { db } from '@/firebase';
 import { useTranslation } from 'react-i18next';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useGeolocation } from '@/hooks/useGeolocation';
-import _, { set } from 'lodash';
+import _ from 'lodash';
 import Storage from '@/utils/storage';  
 import SelectAvatar from '@/components/SelectAvatar';
 
@@ -44,29 +44,29 @@ export default function TerrainListScreen() {
   }
 
  
-   // Retrieve username from AsyncStorage when the component mounts
+  // Charger le nom d'utilisateur et l'avatar depuis AsyncStorage
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const storedUsername = await Storage.getItem('username');
-        const storedAvatar = await Storage.getItem('avatar');
-        const storedUserId = await Storage.getItem('userId');
-        if (storedUsername) {
-          setUsername(storedUsername);
-        }
-        if (storedAvatar) {
-          setAvatar(storedAvatar);
-        }
-        if (storedUserId) {
-          setUserId(storedUserId);
-        }
-      } catch (error) {
-        console.error('Error loading user:', error);
-      }
+    const fetchProfile = async () => {
+      await loadProfile();
+      console.log('Loading profile...');
     };
-    loadUser;
+    fetchProfile();
   }, []);
 
+  const loadProfile = async () => {
+    try {
+      const storedUsername = await Storage.getItem('username');
+      const storedAvatar = await Storage.getItem('avatar');  
+      const storedUserId = await Storage.getItem('userId');  
+      if (storedUsername) setUsername(storedUsername);
+      if (storedAvatar) setAvatar(storedAvatar);
+      if (storedUserId) setUserId(storedUserId);
+      console.log('User:', storedUsername, storedAvatar, storedUserId);
+
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
   
 
   const handleUsernameChange = async (text: string) => {
@@ -112,11 +112,13 @@ export default function TerrainListScreen() {
       const fetchedPlayers = playersSnapshot.docs.map(doc => ({ ...doc.data() }));
       const playerExists = fetchedPlayers.some(player => player.id === userId); 
       if (!playerExists && username !== '') {
+        const updatedUsername = await Storage.getItem('username');
+        const updatedAvatar = await Storage.getItem('avatar');
         await addDoc(collection(db, `terrains/${terrain.id}/players`), {
           id: userId,
-          name: username,
+          name: updatedUsername,
           status: 'present',
-          avatar: avatar,
+          avatar: updatedAvatar,
         } as Player);
         const playersCount = fetchedPlayers.length;
         await updateDoc(terrainRef, {
@@ -141,7 +143,6 @@ export default function TerrainListScreen() {
         }
         console.log('User removed from the terrain players list:', terrain.name);
       }
-
     }
   }
 
@@ -211,17 +212,16 @@ export default function TerrainListScreen() {
 
 
   useEffect(() => {
-    // Start the border color animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(borderColorAnimation, {
           toValue: 1,
-          duration: 1000, // 1 second to transition to red
+          duration: 1000, 
           useNativeDriver: false,
         }),
         Animated.timing(borderColorAnimation, {
           toValue: 0,
-          duration: 1000, // 1 second to transition back to white
+          duration: 1000, 
           useNativeDriver: false,
         }),
       ])

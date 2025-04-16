@@ -3,7 +3,7 @@ import { View, Button, StyleSheet, FlatList, TextInput, Image, Platform } from '
 import { useLocalSearchParams } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { collection, addDoc, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, getDoc, where, query } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { useTranslation } from 'react-i18next'; 
 import { increment, updateDoc, onSnapshot } from 'firebase/firestore'; 
@@ -115,9 +115,19 @@ export default function TerrainDetailScreen() {
 
   const removePlayer = async (playerId: string) => {
     try {
-      console.log('Removing player:', playerId);
-      await deleteDoc(doc(db, `terrains/${id}/players`, playerId));
+      //make a query to get the player document reference
+      const playerQuery = collection(db, `terrains/${id}/players`);
+      //find the player document with the given id
+      const playerDocs = await getDocs(query(playerQuery, where('id', '==', playerId)));
+      if (playerDocs.empty) {
+        console.log('No such player document!');
+        return;
+      }
+      const playerDoc = playerDocs.docs[0].ref; // Get the document reference
+
+      await deleteDoc(playerDoc); // Delete the player document from Firestore
       setPlayers(players.filter((player) => player.id !== playerId));
+
       if (typeof id === 'string') {
         await updateDoc(doc(db, 'terrains', id), {
           playersCount: increment(-1), // Decrement the player count

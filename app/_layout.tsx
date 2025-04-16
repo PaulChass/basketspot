@@ -10,19 +10,19 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useTranslation } from 'react-i18next';
 import '../i18n'; 
 import { authenticateUser } from '@/utils/authService'; 
-import '@/BackgroundFetchHeadlessTask'; // Remove when building for web
+import '../BackgroundFetchHeadlessTask'; // Remove when building for web
 SplashScreen.preventAutoHideAsync();
-import { useBackgroundGeolocation } from '@/hooks/useBackgroundGeolocation'; // Import your custom hook
+import { useBackgroundGeolocation } from '@/hooks/useBackgroundGeolocation';  // Remove when building for web
 
 export default function RootLayout() {
-    useBackgroundGeolocation(); // Start background geolocation tracking
+  useBackgroundGeolocation(); // Remove when building for web
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
   useEffect(() => {
-    authenticateUser(); // Ensure users are authenticated
+    authenticateUser();
   }, []);
 
 

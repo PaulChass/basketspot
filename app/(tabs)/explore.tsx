@@ -52,9 +52,6 @@ export default function TabTwoScreen() {
     setUsername(text);
     try {
       await Storage.setItem('username', text);
-      // Save the username to Firestore
-      const userDocRef = doc(db, 'users', 'userId'); // Replace 'userId' with the actual user ID
-      await setDoc(userDocRef, { username: text }, { merge: true });
       console.log('Username saved:', text);
     } catch (error) {
       console.error('Error saving username:', error);
