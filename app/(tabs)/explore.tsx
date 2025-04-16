@@ -7,13 +7,6 @@ import i18n from 'i18next';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Storage from '@/utils/storage';
-import * as ImagePicker from 'expo-image-picker'; 
-import { Platform } from 'react-native';
-import { SvgUri } from 'react-native-svg';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { predefinedAvatars } from '@/utils/avatars'; // Import your predefined avatars
-import { set } from 'lodash';
 import SelectAvatar from '@/components/SelectAvatar';
 
 
@@ -22,8 +15,7 @@ export default function TabTwoScreen() {
   const [isPresenceDetectionAllowed, setIsPresenceDetectionAllowed] = useState(true);
   const [username, setUsername] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null); 
-  const storage = getStorage();
-  const db = getFirestore();
+ 
 
 
  
@@ -32,19 +24,14 @@ export default function TabTwoScreen() {
     const loadProfile = async () => {
       try {
         const storedUsername = await Storage.getItem('username');
-        const storedAvatar = await Storage.getItem('avatar');
-        // If you want to load the avatar from Firebase Storage, you can do that here as well.
-        // const avatarRef = ref(storage, `avatars/${storedAvatar}`);
-        // const url = await getDownloadURL(avatarRef);        
+        const storedAvatar = await Storage.getItem('avatar');    
         if (storedUsername) setUsername(storedUsername);
         if (storedAvatar) setAvatar(storedAvatar);
       } catch (error) {
         console.error('Error loading profile:', error);
       }
     };
-
     loadProfile();
-
   }, []);
 
   // Sauvegarder le nom d'utilisateur dans AsyncStorage
@@ -57,7 +44,6 @@ export default function TabTwoScreen() {
       console.error('Error saving username:', error);
     }
   };
-
   
   const handleAvatarSelect = async (selectedAvatar: string) => {
     setAvatar(selectedAvatar);

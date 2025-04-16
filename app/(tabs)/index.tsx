@@ -11,7 +11,6 @@ import _ from 'lodash';
 import Storage from '@/utils/storage';  
 import SelectAvatar from '@/components/SelectAvatar';
 
-
 export default function TerrainListScreen() {
   const { t } = useTranslation();
   const [terrains, setTerrains] = useState<Terrain[]>([]);
@@ -23,9 +22,6 @@ export default function TerrainListScreen() {
   const [avatar, setAvatar] = useState<string | null>(null); 
   const [usernameInput, setUsernameInput] = useState('');
   const borderColorAnimation = useRef(new Animated.Value(0)).current;
- 
-
-
   
   interface Terrain {
     id: string;
@@ -43,7 +39,6 @@ export default function TerrainListScreen() {
     avatar?: string;
   }
 
- 
   // Charger le nom d'utilisateur et l'avatar depuis AsyncStorage
   useEffect(() => {
     const fetchProfile = async () => {
@@ -62,13 +57,11 @@ export default function TerrainListScreen() {
       if (storedAvatar) setAvatar(storedAvatar);
       if (storedUserId) setUserId(storedUserId);
       console.log('User:', storedUsername, storedAvatar, storedUserId);
-
     } catch (error) {
       console.error('Error loading profile:', error);
     }
   };
   
-
   const handleUsernameChange = async (text: string) => {
     setUsername(text);
     try {
@@ -85,7 +78,6 @@ export default function TerrainListScreen() {
   };
 
   useEffect(() => {
-    // Fetch terrains from Firestore
     const unsubscribe = onSnapshot(collection(db, 'terrains'), (snapshot) => {
       const fetchedTerrains = snapshot.docs.map((doc) => {
         const data = doc.data();
@@ -125,19 +117,18 @@ export default function TerrainListScreen() {
           playersCount: playersCount + 1,
         });
       }
-    
     } else {
       const terrainRef = doc(db, 'terrains', terrain.id);
       const randomDelay = Math.floor(Math.random() * 4000) + 1000; 
       await new Promise((resolve) => setTimeout(resolve, randomDelay));
       const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
       const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id:doc.id ,...doc.data()  }as Player));
-      const playerExists = fetchedPlayers.some(player => player.name === username); // Replace with  user ID
+      const playerExists = fetchedPlayers.some(player => player.name === userId); // Replace with  user ID
       if (playerExists) {
         await updateDoc(terrainRef, {
           playersCount: Math.max(0, fetchedPlayers.length - 1),
         });
-        const playerDoc = fetchedPlayers.find(player => player.name === username); // Replace with user ID
+        const playerDoc = fetchedPlayers.find(player => player.id === userId); // Replace with user ID
         if (playerDoc) {
           await deleteDoc(doc(db, `terrains/${terrain.id}/players`, playerDoc.id)); // Delete the player document
         }
@@ -145,8 +136,6 @@ export default function TerrainListScreen() {
       }
     }
   }
-
-
 
   
   useEffect(() => {

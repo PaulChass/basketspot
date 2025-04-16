@@ -3,7 +3,7 @@ import { View, Button, StyleSheet, FlatList, TextInput, Image, Platform } from '
 import { useLocalSearchParams } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { collection, addDoc, getDocs, deleteDoc, doc, getDoc, where, query } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, getDoc, where, query, collectionGroup } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { useTranslation } from 'react-i18next'; 
 import { increment, updateDoc, onSnapshot } from 'firebase/firestore'; 
@@ -62,16 +62,34 @@ export default function TerrainDetailScreen() {
   }
 , [id]);
 
+  const generateId = async () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < 8; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    const playersQuery = query(
+      collectionGroup(db, 'players'),
+      where('id', '==', result) 
+    );
+    const querySnapshot = await getDocs(playersQuery);
+    if (!querySnapshot.empty) {
+      return generateId(); // Regenerate ID if it already exists
+    }
+    return result; 
+  };
+
   const handleAddNow = async () => {
     try {
       console.log('Adding player:', playername);
+      const generatedId = await generateId(); // Await the generated ID
       const newPlayer = {
         name: playername === '' ? 'Anon' : playername,
+        id: generatedId, 
         status: 'present',
       };
-  
-      const docRef = await addDoc(collection(db, `terrains/${id}/players`), newPlayer);
-      setPlayers([...players, { id: docRef.id, ...newPlayer }]);
+      setPlayers([...players, {  ...newPlayer }]);
       setPlayerName(''); // Clear input field after adding player
       
       if (typeof id !== 'string') {
@@ -81,8 +99,6 @@ export default function TerrainDetailScreen() {
       await updateDoc(terrainRef, {
         playersCount: increment(1), // Incrémente le nombre de joueurs
       });
-      
-     
     } catch (error) {
       console.error('Error adding player:', error);
     }
