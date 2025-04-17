@@ -1,6 +1,8 @@
 import BackgroundFetch from 'react-native-background-fetch';
 import Geolocation from 'react-native-geolocation-service';
 import { useEffect } from 'react';
+import * as Location from 'expo-location';
+
 
 export function useBackgroundGeolocation() {
   useEffect(() => {
@@ -14,7 +16,10 @@ export function useBackgroundGeolocation() {
       },
       async (taskId) => {
         console.log('[BackgroundFetch] Task executed:', taskId);
-
+         const location = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.High,
+              });
+              console.log('Location:', location);
         // Fetch the user's location
         Geolocation.getCurrentPosition(
           (position) => {

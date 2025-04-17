@@ -95,9 +95,11 @@ export default function TerrainDetailScreen() {
       if (typeof id !== 'string') {
         throw new Error('Invalid terrain ID');
       }
+      const playerRef = collection(db, `terrains/${id}/players`);
+      await addDoc(playerRef, newPlayer); 
       const terrainRef = doc(db, 'terrains', id);
       await updateDoc(terrainRef, {
-        playersCount: increment(1), // Incrémente le nombre de joueurs
+        playersCount: increment(1), 
       });
     } catch (error) {
       console.error('Error adding player:', error);
@@ -131,17 +133,14 @@ export default function TerrainDetailScreen() {
 
   const removePlayer = async (playerId: string) => {
     try {
-      //make a query to get the player document reference
       const playerQuery = collection(db, `terrains/${id}/players`);
-      //find the player document with the given id
       const playerDocs = await getDocs(query(playerQuery, where('id', '==', playerId)));
       if (playerDocs.empty) {
         console.log('No such player document!');
         return;
       }
-      const playerDoc = playerDocs.docs[0].ref; // Get the document reference
-
-      await deleteDoc(playerDoc); // Delete the player document from Firestore
+      const playerDoc = playerDocs.docs[0].ref; 
+      await deleteDoc(playerDoc); 
       setPlayers(players.filter((player) => player.id !== playerId));
 
       if (typeof id === 'string') {

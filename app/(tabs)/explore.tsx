@@ -1,55 +1,19 @@
-import { StyleSheet, Button, View, TextInput, Switch, Image, TouchableOpacity, Alert, Modal, FlatList } from 'react-native';
+import { StyleSheet, Button, View, TextInput, Switch } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import i18n from 'i18next';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Storage from '@/utils/storage';
 import SelectAvatar from '@/components/SelectAvatar';
-
+import { useProfile } from '@/hooks/useProfile';
 
 export default function TabTwoScreen() {
   const { t } = useTranslation();
+  const { username, avatar, updateUsername, updateAvatar } = useProfile();
   const [isPresenceDetectionAllowed, setIsPresenceDetectionAllowed] = useState(true);
-  const [username, setUsername] = useState('');
-  const [avatar, setAvatar] = useState<string | null>(null); 
- 
 
-
- 
-  // Charger le nom d'utilisateur et l'avatar depuis AsyncStorage
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const storedUsername = await Storage.getItem('username');
-        const storedAvatar = await Storage.getItem('avatar');    
-        if (storedUsername) setUsername(storedUsername);
-        if (storedAvatar) setAvatar(storedAvatar);
-      } catch (error) {
-        console.error('Error loading profile:', error);
-      }
-    };
-    loadProfile();
-  }, []);
-
-  // Sauvegarder le nom d'utilisateur dans AsyncStorage
-  const handleUsernameChange = async (text: string) => {
-    setUsername(text);
-    try {
-      await Storage.setItem('username', text);
-      console.log('Username saved:', text);
-    } catch (error) {
-      console.error('Error saving username:', error);
-    }
-  };
-  
-  const handleAvatarSelect = async (selectedAvatar: string) => {
-    setAvatar(selectedAvatar);
-    await Storage.setItem('avatar', selectedAvatar);
-  };
-  
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
@@ -90,15 +54,12 @@ export default function TabTwoScreen() {
             style={styles.input}
             placeholder={t('enterUsername')}
             value={username}
-            onChangeText={handleUsernameChange}
+            onChangeText={updateUsername}
           />
         </ThemedView>
         <View style={styles.container}>
-        <SelectAvatar
-          avatar={avatar}
-          onAvatarSelect={handleAvatarSelect}
-        />
-    </View>
+          <SelectAvatar avatar={avatar} onAvatarSelect={updateAvatar} />
+        </View>
       </View>
     </ParallaxScrollView>
   );
@@ -137,28 +98,5 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 20,
     alignItems: 'center',
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarOption: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    margin: 10,
   },
 });

@@ -10,6 +10,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import _ from 'lodash';
 import Storage from '@/utils/storage';  
 import SelectAvatar from '@/components/SelectAvatar';
+import { useProfile } from '@/hooks/useProfile';
 
 export default function TerrainListScreen() {
   const { t } = useTranslation();
@@ -17,11 +18,10 @@ export default function TerrainListScreen() {
   const [terrainName, setTerrainName] = useState('');
   const router = useRouter();
   const { location, calculateDistance } = useGeolocation();
-  const [username, setUsername] = useState('');
-  const [userId, setUserId] = useState('');
-  const [avatar, setAvatar] = useState<string | null>(null); 
   const [usernameInput, setUsernameInput] = useState('');
   const borderColorAnimation = useRef(new Animated.Value(0)).current;
+  const { username, avatar, userId, updateUsername, updateAvatar } = useProfile();
+
   
   interface Terrain {
     id: string;
@@ -38,44 +38,6 @@ export default function TerrainListScreen() {
     status: string;
     avatar?: string;
   }
-
-  // Charger le nom d'utilisateur et l'avatar depuis AsyncStorage
-  useEffect(() => {
-    const fetchProfile = async () => {
-      await loadProfile();
-      console.log('Loading profile...');
-    };
-    fetchProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    try {
-      const storedUsername = await Storage.getItem('username');
-      const storedAvatar = await Storage.getItem('avatar');  
-      const storedUserId = await Storage.getItem('userId');  
-      if (storedUsername) setUsername(storedUsername);
-      if (storedAvatar) setAvatar(storedAvatar);
-      if (storedUserId) setUserId(storedUserId);
-      console.log('User:', storedUsername, storedAvatar, storedUserId);
-    } catch (error) {
-      console.error('Error loading profile:', error);
-    }
-  };
-  
-  const handleUsernameChange = async (text: string) => {
-    setUsername(text);
-    try {
-      await Storage.setItem('username', text);
-      console.log('Username saved:', text);
-    } catch (error) {
-      console.error('Error saving username:', error);
-    }
-  };
-
-  const handleAvatarSelect = async (selectedAvatar: string) => {
-    setAvatar(selectedAvatar);
-    await Storage.setItem('avatar', selectedAvatar);
-  };
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'terrains'), (snapshot) => {
@@ -123,7 +85,7 @@ export default function TerrainListScreen() {
       await new Promise((resolve) => setTimeout(resolve, randomDelay));
       const playersSnapshot = await getDocs(collection(db, `terrains/${terrain.id}/players`));
       const fetchedPlayers = playersSnapshot.docs.map(doc => ({ id:doc.id ,...doc.data()  }as Player));
-      const playerExists = fetchedPlayers.some(player => player.name === userId); // Replace with  user ID
+      const playerExists = fetchedPlayers.some(player => player.id === userId); // Replace with  user ID
       if (playerExists) {
         await updateDoc(terrainRef, {
           playersCount: Math.max(0, fetchedPlayers.length - 1),
@@ -235,12 +197,12 @@ export default function TerrainListScreen() {
       />
       <SelectAvatar
           avatar={avatar}
-          onAvatarSelect={handleAvatarSelect}
+          onAvatarSelect={updateAvatar} // Pass the updateAvatar function to SelectAvatar
         />
         <View style={{ margin: 10 }}>
           </View>
        
-      <Button title={t('save')} onPress={() => handleUsernameChange(usernameInput)}  />
+      <Button title={t('save')} onPress={() => updateUsername(usernameInput)}  />
     </View>
   );
 }

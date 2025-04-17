@@ -1,16 +1,22 @@
 import { auth } from "../firebase";
 import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import  Storage from "@/utils/storage"; // Adjust the import path as needed
+import { set } from "lodash";
 
 const authenticateUser = async () => {
   try {
     const userCredential = await signInAnonymously(auth);
     console.log("User signed in anonymously:", userCredential.user);
     // You can store the user ID or any other user information here if needed
-    // save the user ID to AsyncStorage or your app's state
-    const userId = userCredential.user.uid;
-    console.log("User ID:", userId);
-    await Storage.setItem("userId", userId); // Save user ID to AsyncStorage
+    Storage.getItem("userId").then(async (userId) => {
+      if (userId) {
+        console.log("User ID from storage:", userId);
+      } else {
+      const userId = userCredential.user.uid;
+      await Storage.setItem("userId", userId); // Save user ID to AsyncStorage      }
+    }
+    });
+    
   } catch (error) {
     console.error("Error signing in anonymously:", error);
   }
